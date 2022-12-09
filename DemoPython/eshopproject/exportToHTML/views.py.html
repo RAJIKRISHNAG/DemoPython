@@ -1,0 +1,68 @@
+<html>
+<head>
+<title>views.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cc7832;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #6897bb;}
+.s3 { color: #6a8759;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+views.py</font>
+</center></td></tr></table>
+<pre><span class="s0">from </span><span class="s1">django.shortcuts </span><span class="s0">import </span><span class="s1">render</span><span class="s0">,</span><span class="s1">redirect</span>
+<span class="s0">from </span><span class="s1">eshopapp.models </span><span class="s0">import </span><span class="s1">product</span>
+<span class="s0">from </span><span class="s1">.models </span><span class="s0">import </span><span class="s1">Cart</span><span class="s0">, </span><span class="s1">CartItem</span>
+<span class="s0">from </span><span class="s1">django.core.exceptions </span><span class="s0">import </span><span class="s1">ObjectDoesNotExist</span>
+
+
+<span class="s0">def </span><span class="s1">_cart_id(request):</span>
+    <span class="s1">cart=request.session.session_key</span>
+    <span class="s0">if not </span><span class="s1">cart:</span>
+        <span class="s1">cart=request.session.create()</span>
+    <span class="s0">return </span><span class="s1">cart</span>
+
+
+<span class="s0">def </span><span class="s1">add_cart(request</span><span class="s0">,</span><span class="s1">Product_id):</span>
+    <span class="s1">Product = product.objects.get(id=Product_id)</span>
+    <span class="s0">try</span><span class="s1">:</span>
+        <span class="s1">cart=Cart.objects.get(cart_id=_cart_id(request))</span>
+
+    <span class="s0">except </span><span class="s1">Cart.DoesNotExist:</span>
+        <span class="s1">cart=Cart.objects.create(</span>
+            <span class="s1">cart_id=_cart_id(request)</span>
+        <span class="s1">)</span>
+        <span class="s1">cart.save()</span><span class="s0">,</span>
+    <span class="s0">try</span><span class="s1">:</span>
+        <span class="s1">cart_item=CartItem.objects.get(Product=Product</span><span class="s0">,</span><span class="s1">cart=cart)</span>
+    <span class="s0">if </span><span class="s1">cart_item.quantity &lt; cart_item.product.stock:</span>
+        <span class="s1">cart_item.quantity +=</span><span class="s2">1</span>
+        <span class="s1">cart_item.save()</span>
+    <span class="s0">except </span><span class="s1">CartItem.DoesNotExist:</span>
+        <span class="s1">cart_item=CartItem.objects.craete(</span>
+            <span class="s1">Product=Product</span><span class="s0">,</span>
+            <span class="s1">quantity=</span><span class="s2">1</span><span class="s0">,</span>
+            <span class="s1">cart=cart</span>
+        <span class="s1">)</span>
+        <span class="s1">cart_item.save()</span>
+    <span class="s0">return </span><span class="s1">redirect(</span><span class="s3">'cart:cart_detail'</span><span class="s1">)</span>
+<span class="s0">def </span><span class="s1">cart_detail(request</span><span class="s0">,</span><span class="s1">total=</span><span class="s2">0</span><span class="s0">,</span><span class="s1">counter=</span><span class="s2">0</span><span class="s0">,</span><span class="s1">cart_items=</span><span class="s0">None</span><span class="s1">):</span>
+    <span class="s0">try</span><span class="s1">:</span>
+        <span class="s1">cart=Cart.objects.get(cart_id=_cart_id(request))</span>
+        <span class="s1">cart_items=CartItem.objects.filter(cart=cart</span><span class="s0">,</span><span class="s1">active=</span><span class="s0">True</span><span class="s1">)</span>
+        <span class="s0">for </span><span class="s1">cart_item </span><span class="s0">in </span><span class="s1">cart_items:</span>
+            <span class="s1">total+=(cart_item.Product.price * cart_item.quantity)</span>
+            <span class="s1">counter +=cart_item.quantity</span>
+
+    <span class="s0">except </span><span class="s1">ObjectDoesNotExist:</span>
+        <span class="s0">pass</span>
+    <span class="s0">return </span><span class="s1">render(request</span><span class="s0">,</span><span class="s3">'cart.html'</span><span class="s0">,</span><span class="s1">dict(cart_items=cart_items</span><span class="s0">,</span><span class="s1">total=total</span><span class="s0">,</span><span class="s1">counter=counter))</span>
+
+</pre>
+</body>
+</html>

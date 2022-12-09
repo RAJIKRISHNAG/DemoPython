@@ -1,0 +1,72 @@
+
+{% extends 'base.html' %}
+{% load static %}
+{% block metadescription %}
+    {% if category %}
+       {{ category.description|truncatewords:155 }}
+    {% else }}
+        Welcome to Beauty World shop Where you can see your beauty....
+    {% endif %}
+{% endblock %}
+{% block title %}
+{% if category %}
+      {{category.name}}-BEAUTY WORLD
+     {% else %}
+           see our new collections-BEAUTY WORLD
+     {% endif %}
+{% endblock %}
+{% block content %}
+{% if category %}
+    <div>
+        <div class="row my_row_class">
+            <div class="mx-auto">
+            <p><a href="{% url 'eshopapp:allProdCat' %}">Our Product Collections</a></p></div>
+        </div>
+            </div>
+    {% endif %}
+<div class="mx_auto">
+    {% if category %}
+        <img class="my_image" src="{{category.image.url}}" alt="{{category.name}}">
+</div>
+    <br>
+<div>
+    <h1 class="text-center my_title">{{category.name}}</h1>
+    <p class="text-justify">{{category.description}}</p>
+</div>
+     {% else %}
+<div>
+    <img class="my_image my_image_padding" src="{% static 'img/banner.png' %}" alt="our products">
+</div>
+<br>
+<div>
+    <h1 class="text-center my_title">our products collections</h1>
+    <p class="text-justify">Cosmetics designed to enhance one's appearance (makeup) can be used to conceal blemishes, enhance one's natural features (such as the eyebrows and eyelashes), add color to a person's face and—in the case of more extreme forms of makeup used for performances, fashion shows and people in costume—can be used to change the appearance of the face entirely to resemble a different person, creature or object. Techniques for changing appearance include contouring, which aims to give shape to an area of the face.</p>
+</div>
+      {% endif %}
+<div class="container">
+    <div class="row mx-auto">
+        {% for product in products.object_list %}
+        <div class="my_bottom_margin col-9 col-sm-12 col-md-4 col-lg-4">
+            <div class="card text-center" style="min-width:18rem;">
+                  <a href="{{product.get_url}}"><img class="card-img-top my_image" src="{{product.image.url}}" style="width:400px;height:300px;" alt="{{product.name}}"></a>
+            <div class="card_body">
+                 <h4>{{product.name}}</h4>
+                 <p>{{product.price}}</p>
+             </div>
+             </div>
+        </div>
+         {% endfor %}
+</div>
+<div class="mx_auto">
+        {% if products.paginator.num_pages > 1 %}
+        <hr>
+        <div class="text-center">
+            {% for pg in products.paginator.page_range %}
+                <a href="?page={{pg}}"  class="btn btn-light btn-sm {% if products.number == pg %} active {% endif %}">{{pg}}</a>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    <br>
+</div>
+{% endblock %}
